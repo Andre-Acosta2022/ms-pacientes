@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import upeu.edu.pe.ms_paciente.domain.ContactoEmergencia;
+import upeu.edu.pe.ms_paciente.repository.ContEmergenciaRepository;
 import upeu.edu.pe.ms_paciente.service.ContEmergenciaService;
 
 import java.util.List;
@@ -15,12 +16,12 @@ import java.util.Optional;
 @RequestMapping("/api/contactos-emergencia")
 public class ContEmergenciaController {
     @Autowired
-    private ContEmergenciaService contactoEmergenciaService;
+    private ContEmergenciaRepository service;
 
     @GetMapping
     public ResponseEntity<List<ContactoEmergencia>> readAll() {
         try {
-            List<ContactoEmergencia> contactos = contactoEmergenciaService.readAll();
+            List<ContactoEmergencia> contactos = service.findAll();
             if (contactos.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
@@ -33,7 +34,7 @@ public class ContEmergenciaController {
     @PostMapping
     public ResponseEntity<ContactoEmergencia> guardarContactoEmergencia(@Valid @RequestBody ContactoEmergencia contacto) {
         try {
-            ContactoEmergencia c = contactoEmergenciaService.create(contacto);
+            ContactoEmergencia c = service.save(contacto);
             return new ResponseEntity<>(c, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -43,7 +44,7 @@ public class ContEmergenciaController {
     @GetMapping("/{id}")
     public ResponseEntity<ContactoEmergencia> getContactoEmergenciaById(@PathVariable("id") Long id) {
         try {
-            ContactoEmergencia c = contactoEmergenciaService.read(id).get();
+            ContactoEmergencia c = service.readById(id);
             return new ResponseEntity<>(c, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -53,7 +54,7 @@ public class ContEmergenciaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarContactoEmergencia(@PathVariable("id") Long id) {
         try {
-            contactoEmergenciaService.delete(id);
+            service.deleteById(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -62,9 +63,9 @@ public class ContEmergenciaController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateContactoEmergencia(@PathVariable("id") Long id, @Valid @RequestBody ContactoEmergencia contacto) {
-        Optional<ContactoEmergencia> c = contactoEmergenciaService.read(id);
-        if (c.isPresent()) {
-            return new ResponseEntity<>(contactoEmergenciaService.update(contacto), HttpStatus.OK);
+        ContactoEmergencia c = service.readById(id);
+        if (c.getId()>0) {
+            return new ResponseEntity<>(service.save(contacto), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

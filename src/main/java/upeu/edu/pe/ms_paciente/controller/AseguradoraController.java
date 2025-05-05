@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import upeu.edu.pe.ms_paciente.domain.aseguradora;
+import upeu.edu.pe.ms_paciente.repository.AseguradoraRepository;
 import upeu.edu.pe.ms_paciente.service.AseguradoraService;
 
 import java.util.List;
@@ -15,12 +16,12 @@ import java.util.Optional;
 public class AseguradoraController {
 
     @Autowired
-    private AseguradoraService aseguradoraService;
+    private AseguradoraRepository service;
 
     @GetMapping
     public ResponseEntity<List<aseguradora>> readAll() {
         try {
-            List<aseguradora> aseguradoras = aseguradoraService.readAll();
+            List<aseguradora> aseguradoras = service.findAll();
             if (aseguradoras.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
@@ -33,7 +34,7 @@ public class AseguradoraController {
     @PostMapping
     public ResponseEntity<aseguradora> guardarAseguradora(@Valid @RequestBody aseguradora asegur) {
         try {
-            aseguradora a = aseguradoraService.create(asegur);
+            aseguradora a = service.save(asegur);
             return new ResponseEntity<>(a, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -43,7 +44,7 @@ public class AseguradoraController {
     @GetMapping("/{id}")
     public ResponseEntity<aseguradora> getAseguradoraById(@PathVariable("id") Long id) {
         try {
-            aseguradora a = aseguradoraService.read(id).get();
+            aseguradora a = service.readById(id);
             return new ResponseEntity<>(a, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -53,7 +54,7 @@ public class AseguradoraController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarAseguradora(@PathVariable("id") Long id) {
         try {
-            aseguradoraService.delete(id);
+            service.deleteById(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -62,9 +63,9 @@ public class AseguradoraController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateAseguradora(@PathVariable("id") Long id, @Valid @RequestBody aseguradora asegu) {
-        Optional<aseguradora> a = aseguradoraService.read(id);
-        if (a.isPresent()) {
-            return new ResponseEntity<>(aseguradoraService.update(asegu), HttpStatus.OK);
+        aseguradora a = service.readById(id);
+        if (a.getId()>0) {
+            return new ResponseEntity<>(service.save(asegu), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

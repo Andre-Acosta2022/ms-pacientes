@@ -5,7 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import upeu.edu.pe.ms_paciente.domain.Paciente;
-import upeu.edu.pe.ms_paciente.service.PacienteService;
+import upeu.edu.pe.ms_paciente.repository.PacienteRepository;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -14,12 +15,12 @@ import java.util.Optional;
 @RequestMapping("/api/pacientes")
 public class PacienteController {
     @Autowired
-    private PacienteService pacienteService;
+    private PacienteRepository service;
 
     @GetMapping
     public ResponseEntity<List<Paciente>> readAll() {
         try {
-            List<Paciente> pacients = pacienteService.readAll();
+            List<Paciente> pacients = service.findAll();
             if(pacients.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
@@ -33,7 +34,7 @@ public class PacienteController {
     @PostMapping
     public ResponseEntity<Paciente> guardarPaciente(@Valid @RequestBody Paciente paci) {
         try {
-            Paciente c = pacienteService.create(paci);
+            Paciente c = service.save(paci);
             return new ResponseEntity<>(c, HttpStatus.CREATED);
         } catch (Exception e) {
             // TODO: handle exception
@@ -44,7 +45,7 @@ public class PacienteController {
     @GetMapping("/{id}")
     public ResponseEntity<Paciente> getPacienteId(@PathVariable("id") Long id) {
         try {
-            Paciente c = pacienteService.read(id).get();
+            Paciente c = service.readById(id);
             return new ResponseEntity<>(c, HttpStatus.CREATED);
         } catch (Exception e) {
             // TODO: handle exception
@@ -57,7 +58,7 @@ public class PacienteController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarPaciente(@PathVariable("id") Long id) {
         try {
-            pacienteService.delete(id);
+            service.deleteById(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             // TODO: handle exception
@@ -67,9 +68,9 @@ public class PacienteController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateAutor(@PathVariable("id") Long id, @Valid @RequestBody Paciente paci){
 
-        Optional<Paciente> c = pacienteService.read(id);
-        if(c.isEmpty()) {
-            return new ResponseEntity<>(pacienteService.update(paci), HttpStatus.OK);
+        Paciente c = service.readById(id);
+        if(c.getId()>0){
+            return new ResponseEntity<>(service.save(paci), HttpStatus.OK);
         }else {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
